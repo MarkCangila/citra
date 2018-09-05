@@ -128,10 +128,18 @@ public:
             std::unique_ptr<SDL_Joystick, decltype(&SDL_JoystickClose)>(joystick, deleter);
     }
     
-    std::string GetDefaultMapping() {
+    std::vector<std::string> GetDefaultMapping() {
         SDL_Joystick* current_sdl_joystick = GetSDLJoystick();
         SDL_JoystickGUID current_guid = SDL_JoystickGetGUID(current_sdl_joystick);
-        return SDL_GameControllerMappingForGUID(current_guid);
+        std::string string_mapping = SDL_GameControllerMappingForGUID(current_guid);
+        std::vector<std::string> results;
+        std::string result;
+        std::istringstream tokenStream(string_mapping);
+        while (std::getline(tokenStream, result, ','))
+        {
+            results.push_back(result);
+        }
+        return results;
     }
     
 private:
