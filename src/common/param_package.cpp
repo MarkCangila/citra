@@ -21,26 +21,10 @@ constexpr char KEY_VALUE_SEPARATOR_ESCAPE[] = "$0";
 constexpr char PARAM_SEPARATOR_ESCAPE[] = "$1";
 constexpr char ESCAPE_CHARACTER_ESCAPE[] = "$2";
 
+void ParamPackage::SetKeysFromSerialized(std::string& serialized);    
+    
 ParamPackage::ParamPackage(const std::string& serialized) {
-    std::vector<std::string> pairs;
-    Common::SplitString(serialized, PARAM_SEPARATOR, pairs);
-
-    for (const std::string& pair : pairs) {
-        std::vector<std::string> key_value;
-        Common::SplitString(pair, KEY_VALUE_SEPARATOR, key_value);
-        if (key_value.size() != 2) {
-            LOG_ERROR(Common, "invalid key pair {}", pair);
-            continue;
-        }
-
-        for (std::string& part : key_value) {
-            part = Common::ReplaceAll(part, KEY_VALUE_SEPARATOR_ESCAPE, {KEY_VALUE_SEPARATOR});
-            part = Common::ReplaceAll(part, PARAM_SEPARATOR_ESCAPE, {PARAM_SEPARATOR});
-            part = Common::ReplaceAll(part, ESCAPE_CHARACTER_ESCAPE, {ESCAPE_CHARACTER});
-        }
-
-        Set(key_value[0], std::move(key_value[1]));
-    }
+    ParamPackage::SetKeysFromSerialized(serialized);
 }
 
 ParamPackage::ParamPackage(std::initializer_list<DataType::value_type> list) : data(list) {}
@@ -124,8 +108,12 @@ bool ParamPackage::Has(const std::string& key) const {
 void ParamPackage::AutoConfig() {
     std::vector<std::string> default_mapping = SDL::GetDefaultMapping();
     
+    ParamPackage::SetKeysFromSerialized(default_mapping);
+}
+
+void ParamPackage::SetKeysFromSerialized(std::string& serialized) {
     std::vector<std::string> pairs;
-    Common::SplitString(default_mapping, PARAM_SEPARATOR, pairs);
+    Common::SplitString(serialized, PARAM_SEPARATOR, pairs);
 
     for (const std::string& pair : pairs) {
         std::vector<std::string> key_value;
@@ -144,5 +132,5 @@ void ParamPackage::AutoConfig() {
         Set(key_value[0], std::move(key_value[1]));
     }
 }
- 
+    
 } // namespace Common
