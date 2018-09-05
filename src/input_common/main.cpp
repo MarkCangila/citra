@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <memory>
+#include <thread>
 #include "common/param_package.h"
 #include "input_common/analog_from_button.h"
 #include "input_common/keyboard.h"
@@ -19,6 +20,10 @@ static std::shared_ptr<Keyboard> keyboard;
 static std::shared_ptr<MotionEmu> motion_emu;
 static std::unique_ptr<CemuhookUDP::State> udp;
 
+#ifdef HAVE_SDL2
+static std::thread poll_thread;
+#endif
+
 void Init() {
     keyboard = std::make_shared<Keyboard>();
     Input::RegisterFactory<Input::ButtonDevice>("keyboard", keyboard);
@@ -34,6 +39,12 @@ void Init() {
     udp = CemuhookUDP::Init();
 }
 
+void StartJoystickEventHandler() {
+#ifdef HAVE_SDL2
+    poll_thread = std::thread(SDL::PollLoop);
+#endif
+}
+
 void Shutdown() {
     Input::UnregisterFactory<Input::ButtonDevice>("keyboard");
     keyboard.reset();
@@ -43,6 +54,7 @@ void Shutdown() {
 
 #ifdef HAVE_SDL2
     SDL::Shutdown();
+    poll_thread.join();
 #endif
 }
 
@@ -74,11 +86,6 @@ std::string GenerateAnalogParamFromKeys(int key_up, int key_down, int key_left, 
         {"modifier_scale", std::to_string(modifier_scale)},
     };
     return circle_pad_param.Serialize();
-}
-
-void ReloadInputDevices() {
-    if (udp)
-        udp->ReloadUDPClient();
 }
 
 namespace Polling {
