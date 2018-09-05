@@ -35,6 +35,8 @@ void HandleGameControllerEvent(const SDL_Event& event);
 /// A Loop that calls HandleGameControllerEvent until Shutdown is called
 void PollLoop();
 
+std::vector<std::string> GetDefaultMapping(); 
+  
 /// Creates a ParamPackage from an SDL_Event that can directly be used to create a ButtonDevice
 Common::ParamPackage SDLEventToButtonParamPackage(const SDL_Event& event);
 
