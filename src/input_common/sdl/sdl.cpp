@@ -127,7 +127,13 @@ public:
         sdl_joystick =
             std::unique_ptr<SDL_Joystick, decltype(&SDL_JoystickClose)>(joystick, deleter);
     }
-
+    
+    std::string GetDefaultMapping() {
+        SDL_Joystick* current_sdl_joystick = GetSDLJoystick();
+        SDL_JoystickGUID current_guid = SDL_JoystickGetGUID(current_sdl_joystick);
+        return SDL_GameControllerMappingForGUID(current_guid);
+    }
+    
 private:
     struct State {
         std::unordered_map<int, bool> buttons;
