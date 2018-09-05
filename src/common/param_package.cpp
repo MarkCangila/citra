@@ -5,9 +5,11 @@
 #include <array>
 #include <utility>
 #include <vector>
+#include <SDL.h>
 #include "common/logging/log.h"
 #include "common/param_package.h"
 #include "common/string_util.h"
+#include "input_common/sdl/sdl.h"
 
 namespace Common {
 
@@ -118,5 +120,29 @@ void ParamPackage::Set(const std::string& key, float value) {
 bool ParamPackage::Has(const std::string& key) const {
     return data.find(key) != data.end();
 }
+    
+void ParamPackage::AutoConfig() {
+    std::vector<std::string> default_mapping = SDL::GetDefaultMapping();
+    
+    std::vector<std::string> pairs;
+    Common::SplitString(default_mapping, PARAM_SEPARATOR, pairs);
 
+    for (const std::string& pair : pairs) {
+        std::vector<std::string> key_value;
+        Common::SplitString(pair, KEY_VALUE_SEPARATOR, key_value);
+        if (key_value.size() != 2) {
+            LOG_ERROR(Common, "invalid key pair {}", pair);
+            continue;
+        }
+
+        for (std::string& part : key_value) {
+            part = Common::ReplaceAll(part, KEY_VALUE_SEPARATOR_ESCAPE, {KEY_VALUE_SEPARATOR});
+            part = Common::ReplaceAll(part, PARAM_SEPARATOR_ESCAPE, {PARAM_SEPARATOR});
+            part = Common::ReplaceAll(part, ESCAPE_CHARACTER_ESCAPE, {ESCAPE_CHARACTER});
+        }
+
+        Set(key_value[0], std::move(key_value[1]));
+    }
+}
+ 
 } // namespace Common
