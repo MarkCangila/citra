@@ -111,6 +111,10 @@ void ParamPackage::AutoConfig() {
     ParamPackage::SetKeysFromSerialized(default_mapping);
 }
 
+bool ParamPackage::IsEmpty() {
+    return data.empty();
+}
+    
 void ParamPackage::SetKeysFromSerialized(std::string& serialized) {
     std::vector<std::string> pairs;
     Common::SplitString(serialized, PARAM_SEPARATOR, pairs);
