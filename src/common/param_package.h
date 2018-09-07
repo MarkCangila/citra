@@ -32,6 +32,8 @@ public:
     void Set(const std::string& key, int value);
     void Set(const std::string& key, float value);
     bool Has(const std::string& key) const;
+    void AutoConfig();
+    bool IsEmpty();
 
 private:
     DataType data;
