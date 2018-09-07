@@ -50,6 +50,7 @@
 #include "common/scm_rev.h"
 #include "common/scope_exit.h"
 #include "common/string_util.h"
+#include "common/param_package.h>
 #include "core/core.h"
 #include "core/file_sys/archive_source_sd_savedata.h"
 #include "core/frontend/applets/default_applets.h"
@@ -1068,6 +1069,10 @@ void GMainWindow::OnMenuRecentFile() {
 }
 
 void GMainWindow::OnStartGame() {
+    if(Common::ParamPackage::IsEmpty()) {
+        Common::ParamPackage::AutoConfig();
+    }
+    
     Camera::QtMultimediaCameraHandler::ResumeCameras();
 
     if (movie_record_on_start) {
